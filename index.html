@@ -29,6 +29,7 @@ body {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px rgba(139, 92, 246, 0.15);
 }
 
+/* Wide rectangle on desktop */
 @media (min-width: 768px) {
   .card {
     max-width: 650px;
@@ -107,8 +108,7 @@ body {
 .field input::placeholder { color: #6b6b8a; }
 
 .checkbox-field {
-  margin-top: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .checkbox-label {
@@ -136,6 +136,7 @@ body {
   margin-left: 28px;
 }
 
+/* Answer Controls */
 .answer-section {
   margin-top: 20px;
   padding: 20px;
@@ -341,6 +342,7 @@ body {
   margin-top: 4px;
 }
 
+/* Toast */
 #toast {
   position: fixed;
   bottom: 24px;
@@ -461,96 +463,16 @@ body {
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const GITHUB_BACKEND_URL = 'https://raw.githubusercontent.com/kahackflooder/backend-url/main/backend.json';
-let BACKEND = null;
-let socket = null;
+// Backend URL - set to your server
+const BACKEND = 'https://simply-welcome-yearly-systems.trycloudflare.com';
+
+// Socket.IO for real-time updates - connect to backend
+const socket = io(BACKEND);
 let currentQuestionIndex = -1;
 let answered = true;
 
-async function loadBackendUrl() {
-  try {
-    const res = await fetch(GITHUB_BACKEND_URL, { cache: 'no-store' });
-    const data = await res.json();
-    if (data.url) {
-      BACKEND = data.url;
-      console.log('Backend URL loaded:', BACKEND);
-      return true;
-    }
-  } catch (e) {
-    console.error('Failed to load backend URL:', e);
-  }
-  return false;
-}
-
-async function initApp() {
-  const loaded = await loadBackendUrl();
-  if (!loaded) {
-    showToast('Failed to load backend URL from GitHub', 'error');
-    return;
-  }
-  
-  socket = io(BACKEND);
-  setupSocketListeners();
-  showToast('Connected to backend', 'success');
-  setInterval(pollStats, 1000);
-}
-
-function setupSocketListeners() {
-  socket.on('botJoinSuccess', (data) => {
-    const el = document.getElementById('joinedCount');
-    el.textContent = parseInt(el.textContent) + 1;
-    addLog(`✅ ${data.name} joined`);
-  });
-
-  socket.on('botJoinBatch', (data) => {
-    const el = document.getElementById('joinedCount');
-    el.textContent = parseInt(el.textContent) + data.count;
-    if (data.count > 5) {
-      addLog(`✅ ${data.count} bots joined`);
-    } else {
-      addLog(`✅ ${data.names.join(', ')} joined`);
-    }
-  });
-
-  socket.on('botJoinFail', (data) => {
-    addLog(`⚠️ ${data.message}`, 'warning');
-  });
-
-  socket.on('botDisconnected', (data) => {
-    addLog(`❌ ${data.name} disconnected`, 'error');
-  });
-
-  socket.on('questionStart', (data) => {
-    currentQuestionIndex = data.questionIndex;
-    answered = false;
-    addLog(`🎯 Question ${data.questionIndex + 1} started (${data.choices} choices)`);
-    const btns = document.querySelectorAll('.answer-btn');
-    btns.forEach(b => {
-      b.style.animation = 'pulse 0.5s ease-in-out 2';
-      setTimeout(() => b.style.animation = '', 1000);
-    });
-  });
-
-  socket.on('questionAnswered', (data) => {
-    answered = true;
-    const colors = ['Red', 'Blue', 'Yellow', 'Green'];
-    addLog(`📝 Bots answered ${colors[data.answer] || data.answer}!`);
-  });
-
-  socket.on('quizStarted', () => {
-    addLog(`🏆 Quiz has started!`);
-  });
-
-  socket.on('spawnStopped', (data) => {
-    addLog(`⏹️ Spawn stopped: ${data.spawned}/${data.total} bots created`, 'warning');
-    document.getElementById('stopBtn').style.display = 'none';
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('startBtn').textContent = 'Start Flood';
-  });
-}
-
+// Smart fetch - uses backend URL
 async function apiFetch(path, options = {}) {
-  if (!BACKEND) throw new Error('Backend not loaded');
   try {
     const r = await fetch(BACKEND + path, { ...options, signal: AbortSignal.timeout(5000) });
     return r;
@@ -559,6 +481,52 @@ async function apiFetch(path, options = {}) {
   }
 }
 
+// Socket event handlers
+socket.on('botJoinSuccess', (data) => {
+  const el = document.getElementById('joinedCount');
+  el.textContent = parseInt(el.textContent) + 1;
+  addLog(`✅ ${data.name} joined`);
+});
+
+socket.on('botJoinFail', (data) => {
+  addLog(`⚠️ ${data.message}`, 'warning');
+});
+
+socket.on('botDisconnected', (data) => {
+  addLog(`❌ ${data.name} disconnected`, 'error');
+});
+
+socket.on('questionStart', (data) => {
+  currentQuestionIndex = data.questionIndex;
+  answered = false;
+  addLog(`🎯 Question ${data.questionIndex + 1} started (${data.choices} choices)`);
+  
+  // Flash the answer buttons
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => {
+    b.style.animation = 'pulse 0.5s ease-in-out 2';
+    setTimeout(() => b.style.animation = '', 1000);
+  });
+});
+
+socket.on('questionAnswered', (data) => {
+  answered = true;
+  const colors = ['Red', 'Blue', 'Yellow', 'Green'];
+  addLog(`📝 Bots answered ${colors[data.answer] || data.answer}!`);
+});
+
+socket.on('quizStarted', () => {
+  addLog(`🏆 Quiz has started!`);
+});
+
+socket.on('spawnStopped', (data) => {
+  addLog(`⏹️ Spawn stopped: ${data.spawned}/${data.total} bots created`, 'warning');
+  document.getElementById('stopBtn').style.display = 'none';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('startBtn').textContent = 'Start Flood';
+});
+
+// Add log message
 function addLog(msg, type = 'info') {
   const logsEl = document.getElementById('gameLogs');
   if (!logsEl) return;
@@ -566,9 +534,11 @@ function addLog(msg, type = 'info') {
   p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
   p.className = type;
   logsEl.prepend(p);
+  // Keep only last 50 logs
   while (logsEl.children.length > 50) logsEl.removeChild(logsEl.lastChild);
 }
 
+// Toast
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -576,19 +546,21 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// Update stats
 function updateStats(s) {
   document.getElementById('joinedCount').textContent = s.joined || 0;
   document.getElementById('failedCount').textContent = s.failed || 0;
 }
 
+// Poll server
 async function pollStats() {
-  if (!BACKEND) return;
   try {
     const r = await apiFetch('/api/bots');
     if (r.ok) updateStats(await r.json());
   } catch(e) {}
 }
 
+// Start flood
 async function startFlood() {
   const pin = document.getElementById('gamePin').value.trim();
   const baseName = document.getElementById('botName').value.trim() || 'Bot';
@@ -622,6 +594,7 @@ async function startFlood() {
   document.getElementById('stopBtn').style.display = 'none';
 }
 
+// Stop joining
 async function stopJoining() {
   try {
     await apiFetch('/api/stop-spawn', { method: 'POST' });
@@ -634,6 +607,7 @@ async function stopJoining() {
   }
 }
 
+// Kill all
 async function killAll() {
   const btn = document.getElementById('killBtn');
   btn.disabled = true;
@@ -654,6 +628,7 @@ async function killAll() {
   setTimeout(pollStats, 500);
 }
 
+// Send answer to all bots
 async function sendAnswer(answer) {
   try {
     const r = await apiFetch('/api/answer', {
@@ -671,6 +646,7 @@ async function sendAnswer(answer) {
   }
 }
 
+// Handle answer mode change
 document.getElementById('answerMode').addEventListener('change', async (e) => {
   const mode = e.target.value;
   try {
@@ -688,7 +664,8 @@ document.getElementById('answerMode').addEventListener('change', async (e) => {
   }
 });
 
-initApp();
+// Init
+setInterval(pollStats, 1000);
 </script>
 
 </body>
