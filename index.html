@@ -1,672 +1,652 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Kahack</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blooket Bot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5b4cdb;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --bg-dark: #0c0c1e;
+            --bg-card: #16162a;
+            --bg-input: #1e1e3a;
+            --text: #ffffff;
+            --text-muted: #a0a0c0;
+            --success: #00b894;
+            --error: #d63031;
+        }
 
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-  font-family: 'Inter', -apple-system, sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-.card {
-  background: linear-gradient(145deg, #252547, #1e1e3f);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 24px;
-  padding: 40px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 60px rgba(139, 92, 246, 0.15);
-}
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0c0c1e 100%);
+        }
 
-/* Wide rectangle on desktop */
-@media (min-width: 768px) {
-  .card {
-    max-width: 650px;
-    padding: 48px 60px;
-  }
-  
-  .row {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-  
-  .stats {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .btn-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 12px;
-  }
-  
-  .btn-row .btn {
-    margin-top: 0;
-  }
-}
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(108, 92, 231, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 206, 201, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(253, 121, 168, 0.1) 0%, transparent 40%);
+            animation: pulse 8s ease-in-out infinite;
+        }
 
-.logo {
-  text-align: center;
-  margin-bottom: 32px;
-}
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
-.logo h1 {
-  font-size: 36px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #a78bfa, #c084fc, #e879f9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+        .particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
 
-.logo p {
-  font-size: 13px;
-  color: #7c7c9a;
-  margin-top: 4px;
-}
+        .particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--secondary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
 
-.field {
-  margin-bottom: 20px;
-}
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
 
-.field label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #a5a5c7;
-  margin-bottom: 8px;
-}
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.field input {
-  width: 100%;
-  padding: 14px 16px;
-  background: rgba(139, 92, 246, 0.08);
-  border: 2px solid rgba(139, 92, 246, 0.2);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 15px;
-  font-family: inherit;
-  transition: all 0.2s;
-}
+        .header { text-align: center; margin-bottom: 30px; }
 
-.field input:focus {
-  outline: none;
-  border-color: #a78bfa;
-  background: rgba(139, 92, 246, 0.15);
-  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
-}
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
 
-.field input::placeholder { color: #6b6b8a; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-.checkbox-field {
-  margin-bottom: 16px;
-}
+        .title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #a5a5c7;
-  font-weight: 500;
-}
+        .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; }
 
-.checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #a78bfa;
-  cursor: pointer;
-}
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
 
-.checkbox-field .hint {
-  display: block;
-  font-size: 11px;
-  color: #6b6b8a;
-  margin-top: 6px;
-  margin-left: 28px;
-}
+        .card-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-/* Answer Controls */
-.answer-section {
-  margin-top: 20px;
-  padding: 20px;
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 16px;
-}
+        .card-header::before {
+            content: '';
+            width: 4px; height: 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
 
-.answer-section h4 {
-  color: #a5a5c7;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
+        .input-group { margin-bottom: 20px; }
 
-.answer-mode {
-  margin-bottom: 16px;
-}
+        .input-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 600;
+        }
 
-.answer-mode select {
-  width: 100%;
-  padding: 10px 14px;
-  background: rgba(139, 92, 246, 0.1);
-  border: 2px solid rgba(139, 92, 246, 0.2);
-  border-radius: 10px;
-  color: #fff;
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-}
+        .input-wrapper { position: relative; }
 
-.answer-mode select:focus {
-  outline: none;
-  border-color: #a78bfa;
-}
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            opacity: 0.5;
+        }
 
-.answer-mode select option {
-  background: #1e1e3f;
-  color: #fff;
-}
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            background: var(--bg-input);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1.1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-.answer-buttons {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+        }
 
-.answer-btn {
-  aspect-ratio: 1;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  opacity: 0.85;
-}
+        input[type="text"]::placeholder { color: var(--text-muted); opacity: 0.5; }
 
-.answer-btn:hover {
-  opacity: 1;
-  transform: scale(1.05);
-}
+        select {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            background: var(--bg-input);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            appearance: none;
+        }
 
-.answer-btn:active {
-  transform: scale(0.95);
-}
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+        }
 
-.answer-btn svg {
-  width: 32px;
-  height: 32px;
-  fill: white;
-}
+        select option {
+            background: var(--bg-dark);
+            color: var(--text);
+            padding: 10px;
+        }
 
-.answer-btn.red { background: #e21b3c; }
-.answer-btn.blue { background: #1368ce; }
-.answer-btn.yellow { background: #d89e00; }
-.answer-btn.green { background: #26890c; }
+        .toggles { display: flex; flex-direction: column; gap: 15px; margin: 25px 0; }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-  50% { transform: scale(1.1); box-shadow: 0 0 20px 5px rgba(255,255,255,0.3); }
-}
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
 
-.game-log {
-  margin-top: 20px;
-  background: linear-gradient(145deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.08));
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 12px;
-  padding: 12px;
-  max-height: 180px;
-  overflow-y: auto;
-}
+        .toggle-row:hover { background: rgba(108, 92, 231, 0.1); }
 
-.game-log h4 {
-  color: #c4b5fd;
-  font-size: 12px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+        .toggle-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
 
-.game-log p {
-  font-size: 11px;
-  color: #d1d5db;
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
-}
+        checkbox {
+            position: relative;
+            width: 50px; height: 28px;
+            min-width: 50px;
+            background: var(--bg-dark);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            pointer-events: none;
+        }
 
-.game-log p.warning { color: #fbbf24; }
-.game-log p.error { color: #f87171; }
-.game-log p.success { color: #a78bfa; }
+        checkbox::before {
+            content: '';
+            position: absolute;
+            width: 22px; height: 22px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: all 0.3s ease;
+        }
 
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
+        checkbox[checked] { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        checkbox[checked]::before { transform: translateX(22px); background: white; }
 
-.btn-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-}
+        .join-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.btn {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+        .join-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(108, 92, 231, 0.4);
+        }
 
-.btn-start {
-  background: linear-gradient(135deg, #8b5cf6, #a855f7, #c026d3);
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-}
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
 
-.btn-start:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(139, 92, 246, 0.5);
-}
+        .status-dot {
+            width: 10px; height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
 
-.btn-kill {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 2px solid rgba(239, 68, 68, 0.3);
-}
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.4); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(0, 184, 148, 0); }
+        }
 
-.btn-kill:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.25);
-  border-color: rgba(239, 68, 68, 0.5);
-}
+        #status { font-weight: 600; color: var(--text-muted); }
+        #ctrlpanel { width: 100%; }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
+        .normtext {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin: 15px 0 10px;
+        }
 
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 28px;
-}
+        .cheatcontainer { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
 
-.stat {
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 16px;
-  padding: 20px;
-  text-align: center;
-}
+        .cheatcontainer button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--secondary), #00b894);
+            border: none;
+            border-radius: 10px;
+            color: var(--bg-dark);
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
 
-.stat.good { 
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.2);
-}
-.stat.bad { 
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.2);
-}
+        .cheatcontainer button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 206, 201, 0.4);
+        }
 
-.stat-num {
-  font-size: 32px;
-  font-weight: 700;
-}
+        .inputcontainer {
+            background: var(--bg-input);
+            border-radius: 10px;
+            padding: 10px 15px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+        }
 
-.stat.good .stat-num { color: #4ade80; }
-.stat.bad .stat-num { color: #f87171; }
+        .inputcontainer > div { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
-.stat-label {
-  font-size: 12px;
-  color: #8b8bab;
-  font-weight: 500;
-  margin-top: 4px;
-}
+        .inputcontainer input,
+        .inputcontainer select {
+            background: var(--bg-dark);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+        }
 
-/* Toast */
-#toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: linear-gradient(135deg, #8b5cf6, #a855f7);
-  color: #fff;
-  padding: 14px 28px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 999;
-  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
-}
+        .errorBar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: linear-gradient(135deg, var(--error), #c0392b);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-weight: 600;
+            transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+        }
 
-#toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
+        .errorBar.show { transform: translateY(0); }
 
-.footer {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 12px;
-  color: #5c5c7a;
-}
-</style>
+        .chat {
+            position: fixed;
+            left: 20px; top: 100px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        #drag {
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            cursor: move;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            font-weight: 700;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .chatcontainer {
+            width: 350px; height: 250px;
+            background: var(--bg-dark);
+            margin: 10px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column-reverse;
+            overflow-y: auto;
+        }
+
+        .chatmsg { padding: 8px 12px; font-size: 0.85rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+        #chat {
+            margin: 10px;
+            padding: 12px;
+            background: var(--bg-input);
+            border: none;
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            width: calc(100% - 20px);
+        }
+
+        #chat:focus { outline: none; box-shadow: 0 0 0 2px var(--primary); }
+
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: var(--secondary); text-decoration: none; font-weight: 600; }
+        .links a:hover { color: var(--primary); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+        .icon { width: 1.2em; height: 1.2em; display: inline-block; vertical-align: middle; fill: currentColor; }
+        .icon-lg { width: 3rem; height: 3rem; }
+        .icon-btn { width: 1.4em; height: 1.4em; margin-right: 8px; }
+
+        /* iPad & Mobile Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 20px 15px; }
+            .card { padding: 20px; }
+            .title { font-size: 2rem; }
+            .logo { font-size: 2.5rem; }
+            .icon-lg { width: 2.5rem; height: 2.5rem; }
+            input[type="text"], select { font-size: 16px !important; } /* Prevents iOS zoom on focus */
+            .join-btn { padding: 16px; font-size: 1.1rem; }
+            .chatcontainer { width: 280px; height: 200px; }
+        }
+
+        /* Touch-friendly toggles */
+        checkbox {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .toggle-row {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
 </head>
 <body>
-
-<div class="card">
-  <div class="logo">
-    <h1>Kahack</h1>
-    <p>Bot Flooder</p>
-  </div>
-
-  <div class="field">
-    <label>Game PIN</label>
-    <input type="text" id="gamePin" placeholder="Enter game PIN" maxlength="10" autocomplete="off">
-  </div>
-
-  <div class="row">
-    <div class="field">
-      <label>Bot Name</label>
-      <input type="text" id="botName" value="Bot" placeholder="Bot">
+    <div class="bg-animation"></div>
+    
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 2.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 4.5s;"></div>
     </div>
-    <div class="field">
-      <label>Count</label>
-      <input type="number" id="botCount" value="10" min="1" max="2000">
+
+    <div class="errorBar" id="error"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="3"/><circle cx="8" cy="12" r="2" fill="var(--secondary)"/><circle cx="16" cy="10" r="1.5" fill="var(--accent)"/><circle cx="16" cy="14" r="1.5" fill="var(--primary)"/><line x1="5" y1="12" x2="4" y2="12"/><line x1="8" y1="9" x2="8" y2="8"/></svg></div>
+            <h1 class="title">Blooket Bot</h1>
+            <p class="subtitle">flood any game instantly</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-dot"></div>
+            <span id="status">Loading...</span>
+        </div>
+
+        <div class="card" id="cc">
+            <div class="card-header">Join a Game</div>
+
+            <div class="input-group">
+                <label class="input-label">Game Code</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="var(--accent)"/></svg></span>
+                    <input type="text" id="gcode" placeholder="1234567" maxlength="7">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Nickname</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+                    <input type="text" id="gname" placeholder="YourName">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Number of Bots</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="5" y="4" width="14" height="12" rx="2"/><circle cx="9" cy="10" r="1.5" fill="var(--primary)"/><circle cx="15" cy="10" r="1.5" fill="var(--primary)"/><path d="M9 14h6"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/></svg></span>
+                    <input type="text" id="botcount" placeholder="1" value="1" maxlength="3">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Blook</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="var(--secondary)"/><circle cx="9" cy="10" r="1" fill="var(--primary)"/><circle cx="15" cy="10" r="1" fill="var(--primary)"/></svg></span>
+                    <select id="blookSelect">
+                        <option value="hitler">🎨 German Painter</option>
+                        <option value="random">🎲 Random</option>
+                        <option value="Chick">🐤 Chick</option>
+                        <option value="Chicken">🐔 Chicken</option>
+                        <option value="Cow">🐄 Cow</option>
+                        <option value="Goat">🐐 Goat</option>
+                        <option value="Horse">🐴 Horse</option>
+                        <option value="Pig">🐷 Pig</option>
+                        <option value="Sheep">🐑 Sheep</option>
+                        <option value="Duck">🦆 Duck</option>
+                        <option value="Alpaca">🦙 Alpaca</option>
+                        <option value="Dog">🐕 Dog</option>
+                        <option value="Cat">🐱 Cat</option>
+                        <option value="Rabbit">🐰 Rabbit</option>
+                        <option value="Goldfish">🐠 Goldfish</option>
+                        <option value="Hamster">🐹 Hamster</option>
+                        <option value="Turtle">🐢 Turtle</option>
+                        <option value="Kitten">😺 Kitten</option>
+                        <option value="Puppy">🐶 Puppy</option>
+                        <option value="Bear">🐻 Bear</option>
+                        <option value="Moose">🫎 Moose</option>
+                        <option value="Fox">🦊 Fox</option>
+                        <option value="Raccoon">🦝 Raccoon</option>
+                        <option value="Squirrel">🐿️ Squirrel</option>
+                        <option value="Owl">🦉 Owl</option>
+                        <option value="Hedgehog">🦔 Hedgehog</option>
+                        <option value="Deer">🦌 Deer</option>
+                        <option value="Wolf">🐺 Wolf</option>
+                        <option value="Beaver">🦫 Beaver</option>
+                        <option value="Tiger">🐯 Tiger</option>
+                        <option value="Orangutan">🦧 Orangutan</option>
+                        <option value="Cockatoo">🦜 Cockatoo</option>
+                        <option value="Parrot">🦜 Parrot</option>
+                        <option value="Anaconda">🐍 Anaconda</option>
+                        <option value="Jaguar">🐆 Jaguar</option>
+                        <option value="Macaw">🦜 Macaw</option>
+                        <option value="Toucan">🦜 Toucan</option>
+                        <option value="Panther">🐈‍⬛ Panther</option>
+                        <option value="Capuchin">🐒 Capuchin</option>
+                        <option value="Rainbow Astronaut">🧑‍🚀 Rainbow Astronaut</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="toggles">
+                <div class="toggle-row" onclick="tog('icogmode')">
+                    <div class="toggle-label"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 11c0-1 1-2 2-2h4c1 0 2 1 2 2"/><circle cx="9" cy="13" r="2"/><circle cx="15" cy="13" r="2"/></svg></span> Incognito Mode</div>
+                    <checkbox id="icogmode" checked="true"></checkbox>
+                </div>
+
+                <div class="toggle-row" onclick="tog('bcf')">
+                    <div class="toggle-label"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0" stroke-linecap="round"/></svg></span> Bypass Filter</div>
+                    <checkbox id="bcf"></checkbox>
+                </div>
+
+                <div class="toggle-row" onclick="tog('fpswitch')">
+                    <div class="toggle-label"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="gold" stroke-width="2"><path d="M6 9l6-6 6 6"/><rect x="4" y="9" width="16" height="10" rx="1"/><circle cx="12" cy="14" r="3" fill="gold"/><path d="M12 17v4M8 21h8"/></svg></span> First Place Mode</div>
+                    <checkbox id="fpswitch" checked="true"></checkbox>
+                </div>
+            </div>
+
+            <button class="join-btn" onclick="join()"><svg class="icon icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5l3-3m0 0l9-9a3 3 0 014.5 4.5l-9 9m-4.5 0l4.5-4.5m-4.5 4.5l-3 3m7.5-7.5l-3 3"/><path d="M6 18l-3 3m12-12l3-3" stroke-linecap="round"/></svg>Join Game</button>
+            
+            <button class="join-btn kill-btn" onclick="killAllBots()" style="margin-top: 10px; background: linear-gradient(135deg, var(--error), #c0392b);"><svg class="icon icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="8"/><circle cx="9" cy="9" r="2" fill="currentColor"/><circle cx="15" cy="9" r="2" fill="currentColor"/><path d="M8 16h8M10 16v2M14 16v2"/></svg>Kill All Bots</button>
+            
+            <div class="bot-counter" id="botCounter" style="text-align: center; margin-top: 15px; padding: 10px; background: var(--bg-input); border-radius: 10px; display: none;">
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Active Bots: </span>
+                <span id="activeBotCount" style="color: var(--secondary); font-weight: 700;">0</span>
+            </div>
+        </div>
+
+        <div id="ctrlpanel"></div>
     </div>
-  </div>
 
-  <div class="field checkbox-field">
-    <label class="checkbox-label">
-      <input type="checkbox" id="bypassFilter">
-      <span class="checkmark"></span>
-      <span>Bypass Name Filter</span>
-    </label>
-    <span class="hint">Uses lookalike Unicode characters to bypass filters</span>
-  </div>
-
-  <div class="btn-row">
-    <button class="btn btn-start" id="startBtn" onclick="startFlood()">Start Flood</button>
-    <button class="btn btn-stop" id="stopBtn" onclick="stopJoining()" style="display:none">Stop Joining</button>
-    <button class="btn btn-kill" id="killBtn" onclick="killAll()">Kill All</button>
-  </div>
-
-  <div class="stats">
-    <div class="stat good">
-      <div class="stat-num" id="joinedCount">0</div>
-      <div class="stat-label">Joined</div>
+    <!-- Chat Window -->
+    <div class="chat" style="left: 20px; top: 100px;">
+        <div id="drag"><svg class="icon" style="margin-right: 8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Chat</div>
+        <div class="chatcontainer">
+            <div class="chatmsg"></div>
+        </div>
+        <input type="text" id="chat" placeholder="Type a message...">
     </div>
-    <div class="stat bad">
-      <div class="stat-num" id="failedCount">0</div>
-      <div class="stat-label">Failed</div>
-    </div>
-  </div>
 
-  <div class="answer-section">
-    <h4>Answer Control</h4>
-    <div class="answer-mode">
-      <select id="answerMode">
-        <option value="manual">Manual (click buttons)</option>
-        <option value="random" selected>Random (auto)</option>
-        <option value="first">Always First (Red)</option>
-        <option value="second">Always Second (Blue)</option>
-        <option value="third">Always Third (Yellow)</option>
-        <option value="fourth">Always Fourth (Green)</option>
-      </select>
-    </div>
-    <div class="answer-buttons" id="answerButtons">
-      <button class="answer-btn red" onclick="sendAnswer(0)" title="Red / Triangle">
-        <svg viewBox="0 0 32 32"><path d="M27,24.559972 L5,24.559972 L16,7 L27,24.559972 Z"/></svg>
-      </button>
-      <button class="answer-btn blue" onclick="sendAnswer(1)" title="Blue / Diamond">
-        <svg viewBox="0 0 32 32"><path d="M4,16 L16,4 L28,16 L16,28 Z"/></svg>
-      </button>
-      <button class="answer-btn yellow" onclick="sendAnswer(2)" title="Yellow / Circle">
-        <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11"/></svg>
-      </button>
-      <button class="answer-btn green" onclick="sendAnswer(3)" title="Green / Square">
-        <svg viewBox="0 0 32 32"><rect x="7" y="7" width="18" height="18"/></svg>
-      </button>
-    </div>
-  </div>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getAuth, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-database.js";
+        
+        window.initializeApp = initializeApp;
+        window.deleteApp = deleteApp;
+        window.getAuth = getAuth;
+        window.signInWithCustomToken = signInWithCustomToken;
+        window.getDatabase = getDatabase;
+        window.ref = ref;
+        window.set = set;
+        window.get = get;
+        window.onValue = onValue;
 
-  <div class="game-log">
-    <h4>📋 Game Log</h4>
-    <div id="gameLogs"></div>
-  </div>
+        const urlcode = new URLSearchParams(window.location.search).get("code");
+        if (urlcode) document.querySelector("#gcode").value = urlcode;
+    </script>
 
-  <div class="footer">© 2025 Kahack</div>
-</div>
+    <script src="https://zalgo.org/lunicode.js"></script>
 
-<div id="toast"></div>
+    <script>
+        function join() {
+            var cin = document.getElementById("gcode");
+            var name = document.getElementById("gname");
+            var botCount = parseInt(document.getElementById("botcount").value) || 1;
+            botCount = Math.min(Math.max(botCount, 1), 100); // Limit 1-100 bots
+            
+            var icog = document.getElementById("icogmode").getAttribute("checked") ? true : false;
+            var selectedBlook = document.getElementById("blookSelect").value;
+            
+            // Join multiple bots simultaneously
+            joinMultipleBots(cin.value, name.value, botCount, icog, selectedBlook);
+        }
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script>
-// Backend URL - set to your server
-const BACKEND = 'https://marriage-missions-tackle-wife.trycloudflare.com';
+        function killAllBots() {
+            leaveAllBots();
+        }
 
-// Socket.IO for real-time updates - connect to backend
-const socket = io(BACKEND);
-let currentQuestionIndex = -1;
-let answered = true;
+        function errorBar(error) {
+            var e = document.getElementById("error");
+            e.innerText = error;
+            e.classList.add("show");
+            setTimeout(() => e.classList.remove("show"), 4000);
+        }
 
-// Smart fetch - uses backend URL
-async function apiFetch(path, options = {}) {
-  try {
-    const r = await fetch(BACKEND + path, { ...options, signal: AbortSignal.timeout(5000) });
-    return r;
-  } catch(e) {
-    throw new Error('Backend connection failed');
-  }
-}
-
-// Socket event handlers
-socket.on('botJoinSuccess', (data) => {
-  const el = document.getElementById('joinedCount');
-  el.textContent = parseInt(el.textContent) + 1;
-  addLog(`✅ ${data.name} joined`);
-});
-
-socket.on('botJoinFail', (data) => {
-  addLog(`⚠️ ${data.message}`, 'warning');
-});
-
-socket.on('botDisconnected', (data) => {
-  addLog(`❌ ${data.name} disconnected`, 'error');
-});
-
-socket.on('questionStart', (data) => {
-  currentQuestionIndex = data.questionIndex;
-  answered = false;
-  addLog(`🎯 Question ${data.questionIndex + 1} started (${data.choices} choices)`);
-  
-  // Flash the answer buttons
-  const btns = document.querySelectorAll('.answer-btn');
-  btns.forEach(b => {
-    b.style.animation = 'pulse 0.5s ease-in-out 2';
-    setTimeout(() => b.style.animation = '', 1000);
-  });
-});
-
-socket.on('questionAnswered', (data) => {
-  answered = true;
-  const colors = ['Red', 'Blue', 'Yellow', 'Green'];
-  addLog(`📝 Bots answered ${colors[data.answer] || data.answer}!`);
-});
-
-socket.on('quizStarted', () => {
-  addLog(`🏆 Quiz has started!`);
-});
-
-socket.on('spawnStopped', (data) => {
-  addLog(`⏹️ Spawn stopped: ${data.spawned}/${data.total} bots created`, 'warning');
-  document.getElementById('stopBtn').style.display = 'none';
-  document.getElementById('startBtn').disabled = false;
-  document.getElementById('startBtn').textContent = 'Start Flood';
-});
-
-// Add log message
-function addLog(msg, type = 'info') {
-  const logsEl = document.getElementById('gameLogs');
-  if (!logsEl) return;
-  const p = document.createElement('p');
-  p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  p.className = type;
-  logsEl.prepend(p);
-  // Keep only last 50 logs
-  while (logsEl.children.length > 50) logsEl.removeChild(logsEl.lastChild);
-}
-
-// Toast
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-// Update stats
-function updateStats(s) {
-  document.getElementById('joinedCount').textContent = s.joined || 0;
-  document.getElementById('failedCount').textContent = s.failed || 0;
-}
-
-// Poll server
-async function pollStats() {
-  try {
-    const r = await apiFetch('/api/bots');
-    if (r.ok) updateStats(await r.json());
-  } catch(e) {}
-}
-
-// Start flood
-async function startFlood() {
-  const pin = document.getElementById('gamePin').value.trim();
-  const baseName = document.getElementById('botName').value.trim() || 'Bot';
-  const count = parseInt(document.getElementById('botCount').value) || 10;
-  const bypass = document.getElementById('bypassFilter').checked;
-
-  if (!pin || !/^\d+$/.test(pin)) {
-    showToast('Enter a valid PIN');
-    return;
-  }
-
-  const btn = document.getElementById('startBtn');
-  btn.disabled = true;
-  btn.textContent = 'Starting...';
-  document.getElementById('stopBtn').style.display = 'block';
-  
-  try {
-    const r = await apiFetch('/api/spawn', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin, count, baseName, bypass })
-    });
-    const d = await r.json();
-    showToast(r.ok ? `Spawning ${count} bots` : (d.error || 'Failed'));
-  } catch(e) {
-    showToast('Connection error');
-  }
-  
-  btn.disabled = false;
-  btn.textContent = 'Start Flood';
-  document.getElementById('stopBtn').style.display = 'none';
-}
-
-// Stop joining
-async function stopJoining() {
-  try {
-    await apiFetch('/api/stop-spawn', { method: 'POST' });
-    showToast('Stopping bot spawn...');
-    document.getElementById('stopBtn').style.display = 'none';
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('startBtn').textContent = 'Start Flood';
-  } catch(e) {
-    showToast('Stop failed');
-  }
-}
-
-// Kill all
-async function killAll() {
-  const btn = document.getElementById('killBtn');
-  btn.disabled = true;
-  btn.textContent = 'Killing...';
-  
-  try {
-    const r = await apiFetch('/api/kill-all', { method: 'POST' });
-    const d = await r.json();
-    showToast(r.ok ? `Killed ${d.killed} bots` : 'Kill failed');
-    document.getElementById('joinedCount').textContent = '0';
-    document.getElementById('failedCount').textContent = '0';
-  } catch(e) {
-    showToast('Connection error');
-  }
-  
-  btn.disabled = false;
-  btn.textContent = 'Kill All';
-  setTimeout(pollStats, 500);
-}
-
-// Send answer to all bots
-async function sendAnswer(answer) {
-  try {
-    const r = await apiFetch('/api/answer', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answer })
-    });
-    const d = await r.json();
-    if (r.ok) {
-      const colors = ['Red', 'Blue', 'Yellow', 'Green', '5th', '6th', '7th', '8th'];
-      showToast(`Answered ${colors[d.answer] || d.answer} (${d.sent} bots)`);
-    }
-  } catch(e) {
-    showToast('Answer failed');
-  }
-}
-
-// Handle answer mode change
-document.getElementById('answerMode').addEventListener('change', async (e) => {
-  const mode = e.target.value;
-  try {
-    const r = await apiFetch('/api/answer-mode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode })
-    });
-    const d = await r.json();
-    if (r.ok) {
-      showToast(`Mode: ${mode} (${d.sent || 0} bots)`);
-    }
-  } catch(e) {
-    showToast('Mode change failed');
-  }
-});
-
-// Init
-setInterval(pollStats, 1000);
-</script>
-
+        function tog(id) {
+            var cb = document.getElementById(id);
+            if (cb.hasAttribute("checked")) {
+                cb.removeAttribute("checked");
+            } else {
+                cb.setAttribute("checked", "true");
+            }
+        }
+    </script>
+    <script src="script.js"></script>
 </body>
 </html>
