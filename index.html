@@ -150,7 +150,6 @@ body {
   border-radius: 6px;
   position: relative;
   flex-shrink: 0;
-  transform: translate(-3px, 10px);
 }
 
 .checkbox-label input[type="checkbox"]:checked {
@@ -184,6 +183,26 @@ body {
   background: rgba(139, 92, 246, 0.08);
   border: 1px solid rgba(139, 92, 246, 0.15);
   border-radius: 16px;
+}
+
+.answer-section.disabled {
+  opacity: 0.65;
+}
+
+.answer-section.disabled .answer-buttons .answer-btn {
+  pointer-events: none;
+}
+
+.answer-warning {
+  display: none;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecdd3;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  line-height: 1.4;
 }
 
 .answer-section h4 {
@@ -516,6 +535,14 @@ body {
     <span class="hint">Uses lookalike Unicode characters to bypass filters</span>
   </div>
 
+  <div class="field checkbox-field">
+    <label class="checkbox-label">
+      <input type="checkbox" id="betterJoin">
+      <span>Better Joining (no answering)</span>
+    </label>
+    <span class="hint">Faster joins without Socket.IO; answering will be disabled for this match</span>
+  </div>
+
   <div class="btn-row">
     <button class="btn btn-start" id="startBtn" onclick="startFlood()">Start Flood</button>
     <button class="btn btn-stop" id="stopBtn" onclick="stopJoining()" style="display:none">Stop Joining</button>
@@ -533,7 +560,8 @@ body {
     </div>
   </div>
 
-  <div class="answer-section">
+  <div class="answer-section" id="answerSection">
+    <div id="answerWarning" class="answer-warning"></div>
     <h4>Answer Control</h4>
     <div class="answer-mode">
       <select id="answerMode">
@@ -578,6 +606,14 @@ let BACKEND = null;
 let socket = null;
 let currentQuestionIndex = -1;
 let answered = true;
+let socketConnected = false;
+let socketFailed = false;
+let socketDisabledByUser = false;
+let socketConnectTimeout = null;
+const answerBlocks = new Set();
+const PIN_REGEX = /^\d{4,10}$/;
+const SOCKET_FAIL_MESSAGE = 'External connection failed. Answering is not available right now.';
+const BETTER_JOIN_MESSAGE = 'Better Joining is on. Answering is disabled for this match.';
 
 async function loadBackendUrl() {
   try {
@@ -605,14 +641,23 @@ async function initApp() {
     showToast('Failed to load backend URL from GitHub', 'error');
     return;
   }
-  
-  socket = io(BACKEND);
-  setupSocketListeners();
-  showToast('Connected to backend', 'success');
+
+  const betterJoinToggle = document.getElementById('betterJoin');
+  if (betterJoinToggle) {
+    betterJoinToggle.addEventListener('change', onBetterJoinToggle);
+  }
+
+  if (betterJoinToggle && betterJoinToggle.checked) {
+    addAnswerBlock(BETTER_JOIN_MESSAGE);
+  } else {
+    connectSocket();
+  }
+
   setInterval(pollStats, 1000);
 }
 
 function setupSocketListeners() {
+  if (!socket) return;
   socket.on('botJoinSuccess', (data) => {
     const el = document.getElementById('joinedCount');
     el.textContent = parseInt(el.textContent) + 1;
@@ -693,6 +738,37 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+function updateAnsweringState() {
+  const disabled = answerBlocks.size > 0;
+  const section = document.getElementById('answerSection');
+  const warning = document.getElementById('answerWarning');
+  const mode = document.getElementById('answerMode');
+  if (section) section.classList.toggle('disabled', disabled);
+  if (warning) {
+    if (disabled) {
+      warning.textContent = Array.from(answerBlocks)[0] || '';
+      warning.style.display = 'block';
+    } else {
+      warning.style.display = 'none';
+    }
+  }
+  if (mode) mode.disabled = disabled;
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = disabled;
+    btn.style.opacity = disabled ? '0.6' : '';
+  });
+}
+
+function addAnswerBlock(message) {
+  if (message) answerBlocks.add(message);
+  updateAnsweringState();
+}
+
+function clearAnswerBlock(message) {
+  if (message) answerBlocks.delete(message);
+  updateAnsweringState();
+}
+
 function updateStats(s) {
   document.getElementById('joinedCount').textContent = s.joined || 0;
   document.getElementById('failedCount').textContent = s.failed || 0;
@@ -706,15 +782,103 @@ async function pollStats() {
   } catch(e) {}
 }
 
+function handleSocketFailure(message = SOCKET_FAIL_MESSAGE) {
+  if (socketFailed) return; // Already failed, don't spam
+  socketConnected = false;
+  socketFailed = true;
+  addLog('⚠️ Socket.IO connection failed - answering disabled', 'warning');
+  addAnswerBlock(message);
+}
+
+function connectSocket() {
+  if (!BACKEND || socketDisabledByUser) return;
+  if (socket) {
+    try { socket.disconnect(); } catch (e) {}
+    socket = null;
+  }
+  
+  addLog('🔌 Connecting to Socket.IO...', 'info');
+  
+  socket = io(BACKEND, { 
+    timeout: 4000, 
+    reconnectionAttempts: 2,
+    reconnectionDelay: 1000
+  });
+  
+  // Fallback timeout in case socket.io events don't fire
+  if (socketConnectTimeout) clearTimeout(socketConnectTimeout);
+  socketConnectTimeout = setTimeout(() => {
+    if (!socketConnected && !socketFailed) {
+      handleSocketFailure();
+    }
+  }, 6000);
+  
+  socket.on('connect', () => {
+    if (socketConnectTimeout) clearTimeout(socketConnectTimeout);
+    socketConnectTimeout = null;
+    socketConnected = true;
+    socketFailed = false;
+    clearAnswerBlock(SOCKET_FAIL_MESSAGE);
+    clearAnswerBlock('External connection lost. Answering is not available right now.');
+    addLog('✅ Socket.IO connected', 'success');
+    showToast('Connected to backend');
+  });
+  socket.on('disconnect', (reason) => {
+    if (socketConnectTimeout) clearTimeout(socketConnectTimeout);
+    socketConnectTimeout = null;
+    if (!socketDisabledByUser && reason !== 'io client disconnect') {
+      handleSocketFailure('External connection lost. Answering is not available right now.');
+    }
+  });
+  socket.on('connect_error', (err) => {
+    console.log('Socket.IO connect_error:', err?.message || err);
+    handleSocketFailure();
+  });
+  socket.on('connect_timeout', () => handleSocketFailure());
+  socket.on('error', (err) => {
+    console.log('Socket.IO error:', err?.message || err);
+    handleSocketFailure();
+  });
+  setupSocketListeners();
+}
+
+function onBetterJoinToggle() {
+  const enabled = document.getElementById('betterJoin')?.checked;
+  socketDisabledByUser = !!enabled;
+  if (enabled) {
+    answerBlocks.clear();
+    if (socketConnectTimeout) {
+      clearTimeout(socketConnectTimeout);
+      socketConnectTimeout = null;
+    }
+    if (socket) {
+      try { socket.disconnect(); } catch (e) {}
+      socket = null;
+    }
+    socketConnected = false;
+    socketFailed = false;
+    addAnswerBlock(BETTER_JOIN_MESSAGE);
+  } else {
+    clearAnswerBlock(BETTER_JOIN_MESSAGE);
+    socketFailed = false;
+    connectSocket();
+  }
+}
+
 async function startFlood() {
   const pin = document.getElementById('gamePin').value.trim();
   const baseName = document.getElementById('botName').value.trim() || 'Bot';
-  const count = parseInt(document.getElementById('botCount').value) || 10;
+  const countInput = parseInt(document.getElementById('botCount').value) || 10;
+  const count = Math.max(1, Math.min(countInput, 2000));
   const bypass = document.getElementById('bypassFilter').checked;
 
-  if (!pin || !/^\d+$/.test(pin)) {
-    showToast('Enter a valid PIN');
+  if (!pin || !PIN_REGEX.test(pin)) {
+    showToast('Enter a valid PIN (4-10 digits)');
     return;
+  }
+  
+  if (countInput !== count) {
+    showToast(`Bot count adjusted to ${count} (max: 2000)`);
   }
 
   const btn = document.getElementById('startBtn');
@@ -772,6 +936,10 @@ async function killAll() {
 }
 
 async function sendAnswer(answer) {
+  if (answerBlocks.size > 0) {
+    showToast('Answering is currently disabled');
+    return;
+  }
   try {
     const r = await apiFetch('/api/answer', {
       method: 'POST',
@@ -790,6 +958,10 @@ async function sendAnswer(answer) {
 
 document.getElementById('answerMode').addEventListener('change', async (e) => {
   const mode = e.target.value;
+  if (answerBlocks.size > 0) {
+    showToast('Answering is currently disabled');
+    return;
+  }
   try {
     const r = await apiFetch('/api/answer-mode', {
       method: 'POST',
