@@ -3,20 +3,34 @@
 <head>
 <meta charset="UTF-8" />
 <title>Kahack</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%238b5cf6' width='100' height='100' rx='20'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>K</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><rect fill='%238b5cf6' width='100%25' height='100%25'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
 
 body {
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
 }
 
 .card {
@@ -92,9 +106,11 @@ body {
   border: 2px solid rgba(139, 92, 246, 0.2);
   border-radius: 12px;
   color: #fff;
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
   transition: all 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .field input:focus {
@@ -107,25 +123,51 @@ body {
 .field input::placeholder { color: #6b6b8a; }
 
 .checkbox-field {
-  margin-top: 8px;
-  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
   font-size: 14px;
   color: #a5a5c7;
   font-weight: 500;
+  padding: 8px 0;
+  touch-action: manipulation;
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   accent-color: #a78bfa;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(139, 92, 246, 0.1);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 6px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+  background: #a78bfa;
+  border-color: #a78bfa;
+}
+
+.checkbox-label input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .checkbox-field .hint {
@@ -142,6 +184,26 @@ body {
   background: rgba(139, 92, 246, 0.08);
   border: 1px solid rgba(139, 92, 246, 0.15);
   border-radius: 16px;
+}
+
+.answer-section.disabled {
+  opacity: 0.65;
+}
+
+.answer-section.disabled .answer-buttons .answer-btn {
+  pointer-events: none;
+}
+
+.answer-warning {
+  display: none;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecdd3;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  line-height: 1.4;
 }
 
 .answer-section h4 {
@@ -162,9 +224,15 @@ body {
   border: 2px solid rgba(139, 92, 246, 0.2);
   border-radius: 10px;
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   font-family: inherit;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a78bfa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
 }
 
 .answer-mode select:focus {
@@ -191,8 +259,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: transform 0.15s ease, opacity 0.15s ease;
   opacity: 0.85;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  min-height: 60px;
 }
 
 .answer-btn:hover {
@@ -201,7 +272,8 @@ body {
 }
 
 .answer-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
+  opacity: 1;
 }
 
 .answer-btn svg {
@@ -228,6 +300,7 @@ body {
   padding: 12px;
   max-height: 180px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .game-log h4 {
@@ -267,11 +340,14 @@ body {
   padding: 16px;
   border: none;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
 }
 
 .btn-start {
@@ -285,6 +361,20 @@ body {
   box-shadow: 0 6px 30px rgba(139, 92, 246, 0.5);
 }
 
+.btn-start:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-stop {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 2px solid rgba(251, 191, 36, 0.3);
+}
+
+.btn-stop:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
 .btn-kill {
   background: rgba(239, 68, 68, 0.15);
   color: #f87171;
@@ -294,6 +384,10 @@ body {
 .btn-kill:hover:not(:disabled) {
   background: rgba(239, 68, 68, 0.25);
   border-color: rgba(239, 68, 68, 0.5);
+}
+
+.btn-kill:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .btn:disabled {
@@ -344,6 +438,7 @@ body {
 #toast {
   position: fixed;
   bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(80px);
   background: linear-gradient(135deg, #8b5cf6, #a855f7);
@@ -353,9 +448,11 @@ body {
   font-size: 14px;
   font-weight: 500;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   z-index: 999;
   box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+  max-width: calc(100vw - 40px);
+  text-align: center;
 }
 
 #toast.show {
@@ -369,6 +466,41 @@ body {
   font-size: 12px;
   color: #5c5c7a;
 }
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .card {
+    max-width: 550px;
+    padding: 40px 48px;
+  }
+  
+  .answer-buttons {
+    gap: 12px;
+  }
+  
+  .answer-btn {
+    min-height: 70px;
+  }
+  
+  .answer-btn svg {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .btn {
+    padding: 18px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .answer-btn:hover {
+    transform: none;
+    opacity: 0.85;
+  }
+  
+  .btn-start:hover:not(:disabled) {
+    transform: none;
+  }
+}
 </style>
 </head>
 <body>
@@ -381,17 +513,17 @@ body {
 
   <div class="field">
     <label>Game PIN</label>
-    <input type="text" id="gamePin" placeholder="Enter game PIN" maxlength="10" autocomplete="off">
+    <input type="text" inputmode="numeric" pattern="[0-9]*" id="gamePin" placeholder="Enter game PIN" maxlength="10" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
   </div>
 
   <div class="row">
     <div class="field">
       <label>Bot Name</label>
-      <input type="text" id="botName" value="Bot" placeholder="Bot">
+      <input type="text" id="botName" value="Bot" placeholder="Bot" autocorrect="off" autocapitalize="off" spellcheck="false">
     </div>
     <div class="field">
       <label>Count</label>
-      <input type="number" id="botCount" value="10" min="1" max="2000">
+      <input type="number" inputmode="numeric" pattern="[0-9]*" id="botCount" value="10" min="1" max="2000">
     </div>
   </div>
 
@@ -402,6 +534,14 @@ body {
       <span>Bypass Name Filter</span>
     </label>
     <span class="hint">Uses lookalike Unicode characters to bypass filters</span>
+  </div>
+
+  <div class="field checkbox-field">
+    <label class="checkbox-label">
+      <input type="checkbox" id="betterJoin">
+      <span>Better Joining (no answering)</span>
+    </label>
+    <span class="hint">Faster joins without Socket.IO; answering will be disabled for this match</span>
   </div>
 
   <div class="btn-row">
@@ -421,18 +561,34 @@ body {
     </div>
   </div>
 
-  <div class="answer-section">
+  <div class="answer-section" id="answerSection">
+    <div id="answerWarning" class="answer-warning"></div>
     <h4>Answer Control</h4>
-    <div class="answer-mode">
-      <select id="answerMode">
-        <option value="manual">Manual (click buttons)</option>
-        <option value="random" selected>Random (auto)</option>
-        <option value="first">Always First (Red)</option>
-        <option value="second">Always Second (Blue)</option>
-        <option value="third">Always Third (Yellow)</option>
-        <option value="fourth">Always Fourth (Green)</option>
-      </select>
+    <p style="font-size:11px;color:#888;margin-bottom:10px;">Mode affects server auto-answering. Manual = click buttons below.</p>
+    <div class="answer-mode-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px;">
+      <button class="mode-btn active" data-mode="manual" onclick="setAnswerMode('manual')" style="padding:10px 6px;border-radius:8px;border:2px solid #333;background:#1e1e2e;color:#fff;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">🎮</div>Manual
+      </button>
+      <button class="mode-btn" data-mode="random" onclick="setAnswerMode('random')" style="padding:10px 6px;border-radius:8px;border:2px solid #333;background:#1e1e2e;color:#fff;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">🎲</div>Random
+      </button>
+      <button class="mode-btn" data-mode="correct" onclick="setAnswerMode('correct')" style="padding:10px 6px;border-radius:8px;border:2px solid #22c55e;background:#1e1e2e;color:#22c55e;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">✅</div>Correct
+      </button>
+      <button class="mode-btn" data-mode="first" onclick="setAnswerMode('first')" style="padding:10px 6px;border-radius:8px;border:2px solid #e74c3c;background:#1e1e2e;color:#e74c3c;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">🔺</div>Red
+      </button>
+      <button class="mode-btn" data-mode="second" onclick="setAnswerMode('second')" style="padding:10px 6px;border-radius:8px;border:2px solid #1368ce;background:#1e1e2e;color:#1368ce;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">🔷</div>Blue
+      </button>
+      <button class="mode-btn" data-mode="third" onclick="setAnswerMode('third')" style="padding:10px 6px;border-radius:8px;border:2px solid #d89e00;background:#1e1e2e;color:#d89e00;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">🟡</div>Yellow
+      </button>
+      <button class="mode-btn" data-mode="fourth" onclick="setAnswerMode('fourth')" style="padding:10px 6px;border-radius:8px;border:2px solid #26890c;background:#1e1e2e;color:#26890c;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;">
+        <div style="font-size:14px;margin-bottom:2px;">🟢</div>Green
+      </button>
     </div>
+    <input type="hidden" id="answerMode" value="manual">
     <div class="answer-buttons" id="answerButtons">
       <button class="answer-btn red" onclick="sendAnswer(0)" title="Red / Triangle">
         <svg viewBox="0 0 32 32"><path d="M27,24.559972 L5,24.559972 L16,7 L27,24.559972 Z"/></svg>
@@ -449,100 +605,260 @@ body {
     </div>
   </div>
 
+  <!-- Quiz Lookup Section -->
+  <div class="answer-section" id="quizSection">
+    <h4 style="color:#a78bfa;margin-bottom:12px;">🔍 Quiz Answer Lookup</h4>
+    <p style="font-size:12px;color:#888;margin-bottom:10px;">Search for a quiz to get correct answers automatically</p>
+    <div class="quiz-search" style="display:flex;gap:8px;">
+      <input type="text" id="quizSearch" placeholder="Search quiz by name..." style="flex:1;padding:12px;border-radius:8px;border:1px solid #333;background:#1e1e2e;color:#fff;font-size:14px;">
+      <button class="btn" onclick="searchQuiz()" style="padding:12px 20px;font-size:14px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:none;color:#fff;border-radius:8px;cursor:pointer;font-weight:600;">Search</button>
+    </div>
+    <div id="quizResults" style="margin-top:12px;max-height:220px;overflow-y:auto;border-radius:8px;"></div>
+    <div id="linkedQuizDisplay"></div>
+  </div>
+
   <div class="game-log">
     <h4>📋 Game Log</h4>
     <div id="gameLogs"></div>
   </div>
 
-  <div class="footer">© 2025 Kahack</div>
+  <div class="footer">© 2026 Kahack</div>
 </div>
 
 <div id="toast"></div>
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const GITHUB_BACKEND_URL = 'https://raw.githubusercontent.com/kahackflooder/backend-url/main/backend.json';
+(function() {
+  const cdns = [
+    'https://cdn.socket.io/4.7.2/socket.io.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js',
+    'https://unpkg.com/socket.io-client@4.7.2/dist/socket.io.min.js',
+    'https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js'
+  ];
+  function loadScript(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = url;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  async function loadSocketIO() {
+    for (const cdn of cdns) {
+      try { await loadScript(cdn); if (typeof io !== 'undefined') return true; } catch (e) {}
+    }
+    return false;
+  }
+  window.socketIOReady = loadSocketIO();
+})();
+</script>
+<script>
 let BACKEND = null;
 let socket = null;
+const E2E_KEY_HEX = '4b6168616b466c6f6f6465724145533235364743454e435259505433443b2931';
+let e2eKey = null;
+
+async function initE2EKey() {
+  const keyBytes = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) keyBytes[i] = parseInt(E2E_KEY_HEX.substr(i * 2, 2), 16);
+  e2eKey = await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptE2E(data) {
+  if (!e2eKey) await initE2EKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(JSON.stringify(data));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, e2eKey, encoded);
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  return btoa(String.fromCharCode(...combined));
+}
+
+async function decryptE2E(encryptedBase64) {
+  if (!e2eKey) await initE2EKey();
+  const combined = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+  const iv = combined.slice(0, 12);
+  const data = combined.slice(12);
+  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, e2eKey, data);
+  return JSON.parse(new TextDecoder().decode(decrypted));
+}
+
+function isPrivateModeEnabled() { return true; }
 let currentQuestionIndex = -1;
 let answered = true;
+let socketConnected = false;
+let socketFailed = false;
+let socketDisabledByUser = false;
+let socketConnectTimeout = null;
+const answerBlocks = new Set();
+const PIN_REGEX = /^\d{4,10}$/;
+const SOCKET_FAIL_MESSAGE = 'External connection failed. Answering is not available right now.';
+const BETTER_JOIN_MESSAGE = 'Better Joining is on. Answering is disabled for this match.';
+const BACKEND_SOURCES = [
+  'https://api.github.com/repos/gameflooder/backend-url/contents/backend.json',
+  'https://raw.githubusercontent.com/gameflooder/backend-url/main/backend.json'
+];
 
 async function loadBackendUrl() {
-  try {
-    const res = await fetch(GITHUB_BACKEND_URL, { cache: 'no-store' });
-    const data = await res.json();
-    if (data.url) {
-      BACKEND = data.url;
-      console.log('Backend URL loaded:', BACKEND);
-      return true;
-    }
-  } catch (e) {
-    console.error('Failed to load backend URL:', e);
+  // If accessed from localhost, use localhost directly (no tunnel needed)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    BACKEND = window.location.origin;
+    return true;
+  }
+  
+  for (const source of BACKEND_SOURCES) {
+    try {
+      const res = await fetch(source, { 
+        cache: 'no-store',
+        headers: source.includes('api.github.com') ? { 'Accept': 'application/vnd.github.v3+json' } : {}
+      });
+      if (!res.ok) continue;
+      
+      let data;
+      if (source.includes('api.github.com')) {
+        const apiData = await res.json();
+        const content = atob(apiData.content.replace(/\s/g, ''));
+        data = JSON.parse(content);
+      } else {
+        data = await res.json();
+      }
+      
+      if (data.url) {
+        BACKEND = data.url;
+        // Test if the backend is actually reachable
+        try {
+          const testRes = await fetch(BACKEND + '/api/bots', { signal: AbortSignal.timeout(5000) });
+          if (testRes.ok) return true;
+        } catch (e) {
+          console.log('Backend unreachable:', BACKEND, e.message);
+          BACKEND = null; // Reset so we try next source
+          continue;
+        }
+      }
+    } catch (e) {}
   }
   return false;
 }
 
+function showServerDownError() {
+  const card = document.querySelector('.card');
+  if (!card) return;
+  
+  // Create error overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'serverDownOverlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:linear-gradient(145deg,#252547,#1e1e3f);border:2px solid #ef4444;border-radius:20px;padding:40px;max-width:400px;text-align:center;">
+      <div style="font-size:60px;margin-bottom:20px;">🔌</div>
+      <h2 style="color:#f87171;margin-bottom:16px;font-size:24px;">Server Unavailable</h2>
+      <p style="color:#a5a5c7;margin-bottom:24px;line-height:1.6;">The server is currently down or unreachable. This could be due to maintenance or network issues.</p>
+      <button onclick="location.reload()" style="background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;">
+        Try Again
+      </button>
+      <p style="color:#6b6b8a;margin-top:20px;font-size:12px;">If the problem persists, try again in a few minutes.</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 async function initApp() {
-  const loaded = await loadBackendUrl();
+  const socketLoaded = await window.socketIOReady;
+  if (!socketLoaded) addLog('⚠️ Socket.IO failed to load', 'warning');
+  
+  let loaded = false;
+  for (let i = 0; i < 3; i++) {
+    loaded = await loadBackendUrl();
+    if (loaded) break;
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  
   if (!loaded) {
-    showToast('Failed to load backend URL from GitHub', 'error');
+    showServerDownError();
+    addLog('❌ Server unavailable', 'error');
     return;
   }
   
-  socket = io(BACKEND);
-  setupSocketListeners();
-  showToast('Connected to backend', 'success');
+  addLog(`✅ Connected to ${BACKEND}`, 'success');
+  
+  // Sync answer mode from server
+  try {
+    const r = await apiFetch('/api/answer-mode');
+    const d = await r.json();
+    if (d.mode) {
+      document.getElementById('answerMode').value = d.mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        const isActive = btn.dataset.mode === d.mode;
+        btn.classList.toggle('active', isActive);
+        if (isActive) {
+          btn.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)';
+          btn.style.borderColor = '#8b5cf6';
+          btn.style.color = '#fff';
+        }
+      });
+      addLog(`🎮 Mode: ${d.mode}`);
+    }
+  } catch(e) {
+    showServerDownError();
+    return;
+  }
+  
+  // Get current bot stats
+  await pollStats();
+
+  const betterJoinToggle = document.getElementById('betterJoin');
+  if (betterJoinToggle) {
+    betterJoinToggle.addEventListener('change', onBetterJoinToggle);
+  }
+
+  if (betterJoinToggle && betterJoinToggle.checked) {
+    addAnswerBlock(BETTER_JOIN_MESSAGE);
+  } else {
+    connectSocket();
+  }
+
   setInterval(pollStats, 1000);
 }
 
 function setupSocketListeners() {
+  if (!socket) return;
   socket.on('botJoinSuccess', (data) => {
     const el = document.getElementById('joinedCount');
     el.textContent = parseInt(el.textContent) + 1;
     addLog(`✅ ${data.name} joined`);
   });
-
   socket.on('botJoinBatch', (data) => {
     const el = document.getElementById('joinedCount');
     el.textContent = parseInt(el.textContent) + data.count;
-    if (data.count > 5) {
-      addLog(`✅ ${data.count} bots joined`);
-    } else {
-      addLog(`✅ ${data.names.join(', ')} joined`);
-    }
+    addLog(`✅ ${data.count} bots joined`);
   });
-
-  socket.on('botJoinFail', (data) => {
-    addLog(`⚠️ ${data.message}`, 'warning');
-  });
-
-  socket.on('botDisconnected', (data) => {
-    addLog(`❌ ${data.name} disconnected`, 'error');
-  });
-
+  socket.on('botJoinFail', (data) => addLog(`⚠️ ${data.message}`, 'warning'));
+  socket.on('botDisconnected', (data) => addLog(`❌ ${data.name} disconnected`, 'error'));
   socket.on('questionStart', (data) => {
     currentQuestionIndex = data.questionIndex;
     answered = false;
-    addLog(`🎯 Question ${data.questionIndex + 1} started (${data.choices} choices)`);
-    const btns = document.querySelectorAll('.answer-btn');
-    btns.forEach(b => {
+    const currentMode = document.getElementById('answerMode')?.value || 'manual';
+    const qNum = (data.questionIndex || 0) + 1;
+    addLog(`🎯 Question ${qNum} started (${data.choices} choices) - Mode: ${currentMode}`);
+    if (data.correctAnswer) {
+      addLog(`💡 Correct answer available: index ${data.correctAnswer.index}`, 'success');
+    }
+    document.querySelectorAll('.answer-btn').forEach(b => {
       b.style.animation = 'pulse 0.5s ease-in-out 2';
       setTimeout(() => b.style.animation = '', 1000);
     });
+    // Server handles auto-answering based on currentAnswerMode
   });
-
   socket.on('questionAnswered', (data) => {
     answered = true;
     const colors = ['Red', 'Blue', 'Yellow', 'Green'];
-    addLog(`📝 Bots answered ${colors[data.answer] || data.answer}!`);
+    addLog(`📝 Bots answered ${colors[data.answer]}!`);
   });
-
-  socket.on('quizStarted', () => {
-    addLog(`🏆 Quiz has started!`);
-  });
-
+  socket.on('quizStarted', () => addLog('🏆 Quiz started!'));
   socket.on('spawnStopped', (data) => {
-    addLog(`⏹️ Spawn stopped: ${data.spawned}/${data.total} bots created`, 'warning');
+    addLog(`⏹️ Stopped: ${data.spawned}/${data.total}`, 'warning');
     document.getElementById('stopBtn').style.display = 'none';
     document.getElementById('startBtn').disabled = false;
     document.getElementById('startBtn').textContent = 'Start Flood';
@@ -552,7 +868,44 @@ function setupSocketListeners() {
 async function apiFetch(path, options = {}) {
   if (!BACKEND) throw new Error('Backend not loaded');
   try {
-    const r = await fetch(BACKEND + path, { ...options, signal: AbortSignal.timeout(5000) });
+    // Skip E2E for localhost (no encryption needed for local connections)
+    const isLocalhost = BACKEND.includes('localhost') || BACKEND.includes('127.0.0.1');
+    // Force E2E for HTTPS backends (security requirement)
+    const forceE2E = !isLocalhost && BACKEND.startsWith('https://');
+    const privateMode = forceE2E || (!isLocalhost && isPrivateModeEnabled());
+    let finalOptions = { ...options, signal: AbortSignal.timeout(5000) };
+    
+    if (privateMode) {
+      // Encrypt the request body if present, or send empty encrypted payload
+      let dataToEncrypt = {};
+      if (options.body) {
+        try { dataToEncrypt = JSON.parse(options.body); } catch(e) { dataToEncrypt = {}; }
+      }
+      dataToEncrypt._path = path; // Include path in encrypted payload for verification
+      const encrypted = await encryptE2E(dataToEncrypt);
+      
+      finalOptions.method = 'POST'; // All E2E requests use POST
+      finalOptions.headers = { ...finalOptions.headers, 'Content-Type': 'application/json', 'X-E2E': '1' };
+      finalOptions.body = JSON.stringify({ e2e: encrypted });
+      
+      // Use unified E2E endpoint and decrypt response
+      const r = await fetch(BACKEND + '/api/e2e', finalOptions);
+      const encryptedResponse = await r.json();
+      
+      // Decrypt the response
+      if (encryptedResponse.e2e) {
+        const decryptedData = await decryptE2E(encryptedResponse.e2e);
+        // Return a fake Response object with decrypted data
+        return {
+          ok: r.ok,
+          status: r.status,
+          json: async () => decryptedData
+        };
+      }
+      return r;
+    }
+    
+    const r = await fetch(BACKEND + path, finalOptions);
     return r;
   } catch(e) {
     throw new Error('Backend connection failed');
@@ -576,6 +929,37 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+function updateAnsweringState() {
+  const disabled = answerBlocks.size > 0;
+  const section = document.getElementById('answerSection');
+  const warning = document.getElementById('answerWarning');
+  const mode = document.getElementById('answerMode');
+  if (section) section.classList.toggle('disabled', disabled);
+  if (warning) {
+    if (disabled) {
+      warning.textContent = Array.from(answerBlocks)[0] || '';
+      warning.style.display = 'block';
+    } else {
+      warning.style.display = 'none';
+    }
+  }
+  if (mode) mode.disabled = disabled;
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = disabled;
+    btn.style.opacity = disabled ? '0.6' : '';
+  });
+}
+
+function addAnswerBlock(message) {
+  if (message) answerBlocks.add(message);
+  updateAnsweringState();
+}
+
+function clearAnswerBlock(message) {
+  if (message) answerBlocks.delete(message);
+  updateAnsweringState();
+}
+
 function updateStats(s) {
   document.getElementById('joinedCount').textContent = s.joined || 0;
   document.getElementById('failedCount').textContent = s.failed || 0;
@@ -589,15 +973,79 @@ async function pollStats() {
   } catch(e) {}
 }
 
+function handleSocketFailure(message = SOCKET_FAIL_MESSAGE) {
+  if (socketFailed) return;
+  socketConnected = false;
+  socketFailed = true;
+  addLog('⚠️ Socket.IO connection failed', 'warning');
+  addAnswerBlock(message);
+}
+
+function connectSocket() {
+  if (!BACKEND || socketDisabledByUser) return;
+  if (socket) { try { socket.disconnect(); } catch (e) {} socket = null; }
+  addLog('🔌 Connecting to Socket.IO...');
+  socket = io(BACKEND, { timeout: 4000, reconnectionAttempts: 2, reconnectionDelay: 1000 });
+  if (socketConnectTimeout) clearTimeout(socketConnectTimeout);
+  socketConnectTimeout = setTimeout(() => { if (!socketConnected && !socketFailed) handleSocketFailure(); }, 6000);
+  socket.on('connect', () => {
+    if (socketConnectTimeout) clearTimeout(socketConnectTimeout);
+    socketConnectTimeout = null;
+    socketConnected = true;
+    socketFailed = false;
+    clearAnswerBlock(SOCKET_FAIL_MESSAGE);
+    clearAnswerBlock('External connection lost. Answering is not available right now.');
+    addLog('✅ Socket.IO connected', 'success');
+  });
+  socket.on('disconnect', (reason) => {
+    if (socketConnectTimeout) clearTimeout(socketConnectTimeout);
+    socketConnectTimeout = null;
+    if (!socketDisabledByUser && reason !== 'io client disconnect') handleSocketFailure('External connection lost. Answering is not available right now.');
+  });
+  socket.on('connect_error', () => handleSocketFailure());
+  socket.on('connect_timeout', () => handleSocketFailure());
+  socket.on('error', () => handleSocketFailure());
+  setupSocketListeners();
+  setupQuizSocketListeners();
+}
+
+function onBetterJoinToggle() {
+  const enabled = document.getElementById('betterJoin')?.checked;
+  socketDisabledByUser = !!enabled;
+  if (enabled) {
+    answerBlocks.clear();
+    if (socketConnectTimeout) {
+      clearTimeout(socketConnectTimeout);
+      socketConnectTimeout = null;
+    }
+    if (socket) {
+      try { socket.disconnect(); } catch (e) {}
+      socket = null;
+    }
+    socketConnected = false;
+    socketFailed = false;
+    addAnswerBlock(BETTER_JOIN_MESSAGE);
+  } else {
+    clearAnswerBlock(BETTER_JOIN_MESSAGE);
+    socketFailed = false;
+    connectSocket();
+  }
+}
+
 async function startFlood() {
   const pin = document.getElementById('gamePin').value.trim();
   const baseName = document.getElementById('botName').value.trim() || 'Bot';
-  const count = parseInt(document.getElementById('botCount').value) || 10;
+  const countInput = parseInt(document.getElementById('botCount').value) || 10;
+  const count = Math.max(1, Math.min(countInput, 2000));
   const bypass = document.getElementById('bypassFilter').checked;
 
-  if (!pin || !/^\d+$/.test(pin)) {
-    showToast('Enter a valid PIN');
+  if (!pin || !PIN_REGEX.test(pin)) {
+    showToast('Enter a valid PIN (4-10 digits)');
     return;
+  }
+  
+  if (countInput !== count) {
+    showToast(`Bot count adjusted to ${count} (max: 2000)`);
   }
 
   const btn = document.getElementById('startBtn');
@@ -612,7 +1060,7 @@ async function startFlood() {
       body: JSON.stringify({ pin, count, baseName, bypass })
     });
     const d = await r.json();
-    showToast(r.ok ? `Spawning ${count} bots` : (d.error || 'Failed'));
+    showToast(r.ok ? `Spawning ${count} bots 🔐` : (d.error || 'Failed'));
   } catch(e) {
     showToast('Connection error');
   }
@@ -655,6 +1103,12 @@ async function killAll() {
 }
 
 async function sendAnswer(answer) {
+  if (answerBlocks.size > 0) {
+    showToast('Answering is currently disabled');
+    return;
+  }
+  const colors = ['Red', 'Blue', 'Yellow', 'Green', '5th', '6th', '7th', '8th'];
+  
   try {
     const r = await apiFetch('/api/answer', {
       method: 'POST',
@@ -662,17 +1116,38 @@ async function sendAnswer(answer) {
       body: JSON.stringify({ answer })
     });
     const d = await r.json();
-    if (r.ok) {
-      const colors = ['Red', 'Blue', 'Yellow', 'Green', '5th', '6th', '7th', '8th'];
-      showToast(`Answered ${colors[d.answer] || d.answer} (${d.sent} bots)`);
+    if (r.ok && d.sent > 0) {
+      showToast(`Answered ${colors[answer] || answer} (${d.sent} bots)`);
+      addLog(`📝 Answered ${colors[answer]} - ${d.sent} bots`, 'success');
+    } else {
+      showToast('Answer failed - no bots responded');
     }
   } catch(e) {
-    showToast('Answer failed');
+    showToast('Answer failed - connection error');
   }
 }
 
-document.getElementById('answerMode').addEventListener('change', async (e) => {
-  const mode = e.target.value;
+async function setAnswerMode(mode) {
+  // Update UI
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    const isActive = btn.dataset.mode === mode;
+    btn.classList.toggle('active', isActive);
+    if (isActive) {
+      btn.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)';
+      btn.style.borderColor = '#8b5cf6';
+      btn.style.color = '#fff';
+    } else {
+      btn.style.background = '#1e1e2e';
+      btn.style.borderColor = btn.dataset.mode.match(/first|second|third|fourth/) ? '' : '#333';
+      btn.style.color = btn.dataset.mode.match(/first|second|third|fourth/) ? '' : '#fff';
+    }
+  });
+  
+  // Update hidden input
+  const modeInput = document.getElementById('answerMode');
+  if (modeInput) modeInput.value = mode;
+  
+  // Send to server
   try {
     const r = await apiFetch('/api/answer-mode', {
       method: 'POST',
@@ -680,12 +1155,166 @@ document.getElementById('answerMode').addEventListener('change', async (e) => {
       body: JSON.stringify({ mode })
     });
     const d = await r.json();
+    const modeNames = { manual: '🎮 Manual', random: '🎲 Random', correct: '✅ Correct', first: '🔺 Red', second: '🔷 Blue', third: '🟡 Yellow', fourth: '🟢 Green' };
     if (r.ok) {
-      showToast(`Mode: ${mode} (${d.sent || 0} bots)`);
+      showToast(`Mode: ${modeNames[mode] || mode}`);
     }
   } catch(e) {
     showToast('Mode change failed');
   }
+}
+
+// Initialize mode button styling on page load
+setTimeout(() => {
+  const initialMode = document.getElementById('answerMode')?.value || 'manual';
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    if (btn.dataset.mode === initialMode) {
+      btn.style.background = 'linear-gradient(135deg, #8b5cf6, #6366f1)';
+      btn.style.borderColor = '#8b5cf6';
+      btn.style.color = '#fff';
+    }
+  });
+}, 100);
+
+// ========== QUIZ LOOKUP FUNCTIONS ==========
+let currentLinkedQuiz = null;
+
+async function searchQuiz() {
+  const query = document.getElementById('quizSearch')?.value?.trim();
+  if (!query || query.length < 2) {
+    showToast('Enter at least 2 characters to search');
+    return;
+  }
+  
+  const resultsDiv = document.getElementById('quizResults');
+  if (resultsDiv) resultsDiv.innerHTML = '<div style=\"text-align:center;padding:20px;color:#888;\"><span style=\"display:inline-block;animation:spin 1s linear infinite;\">⏳</span> Searching...</div>';
+  
+  try {
+    const r = await apiFetch('/api/quiz/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    const d = await r.json();
+    
+    if (!r.ok) {
+      if (resultsDiv) resultsDiv.innerHTML = `<p style="color:#f44;">Error: ${d.error || 'Search failed'}</p>`;
+      return;
+    }
+    
+    // API returns 'results' not 'quizzes'
+    const quizzes = d.results || d.quizzes || [];
+    if (quizzes.length === 0) {
+      if (resultsDiv) resultsDiv.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">No quizzes found. Try a different search term.</p>';
+      return;
+    }
+    
+    let html = '';
+    quizzes.forEach(q => {
+      const title = (q.title || 'Untitled').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const creator = (q.creator || 'Unknown').replace(/</g, '&lt;');
+      const questions = q.questionCount || '?';
+      const desc = (q.description || '').substring(0, 80).replace(/</g, '&lt;');
+      html += `
+        <div class="quiz-result-item" style="padding:12px;margin:6px 0;background:linear-gradient(135deg,#1e1e2e,#252536);border:1px solid #333;border-radius:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#8b5cf6';this.style.transform='translateX(4px)';" onmouseout="this.style.borderColor='#333';this.style.transform='none';" onclick="linkQuiz('${q.uuid}', '${title.replace(/'/g, "\\'")}')">
+          <div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:4px;">${title}</div>
+          <div style="font-size:11px;color:#666;margin-bottom:6px;">${desc}${desc.length >= 80 ? '...' : ''}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:#888;">by <span style="color:#a78bfa;">${creator}</span></span>
+            <span style="font-size:11px;background:#333;padding:3px 8px;border-radius:4px;color:#8b5cf6;">${questions} Qs</span>
+          </div>
+        </div>
+      `;
+    });
+    if (resultsDiv) resultsDiv.innerHTML = html;
+  } catch(e) {
+    if (resultsDiv) resultsDiv.innerHTML = '<p style="color:#f44;">Connection error</p>';
+  }
+}
+
+async function linkQuiz(uuid, title) {
+  const pin = document.getElementById('gamePin')?.value?.trim();
+  if (!pin || !PIN_REGEX.test(pin)) {
+    showToast('Enter a valid game PIN first');
+    return;
+  }
+  
+  try {
+    const r = await apiFetch('/api/quiz/link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin, uuid })
+    });
+    const d = await r.json();
+    
+    if (r.ok) {
+      currentLinkedQuiz = { uuid, title, pin, questionCount: d.questionCount };
+      updateLinkedQuizDisplay();
+      showToast(`Linked quiz: ${title} (${d.questionCount} Qs) - Switching to Correct mode`);
+      
+      // Auto-switch to "correct" mode using the new function
+      setAnswerMode('correct');
+    } else {
+      showToast(d.error || 'Failed to link quiz');
+    }
+  } catch(e) {
+    showToast('Connection error');
+  }
+}
+
+async function unlinkQuiz() {
+  const pin = document.getElementById('gamePin')?.value?.trim();
+  if (!pin) {
+    currentLinkedQuiz = null;
+    updateLinkedQuizDisplay();
+    return;
+  }
+  
+  try {
+    await apiFetch('/api/quiz/unlink', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin })
+    });
+    currentLinkedQuiz = null;
+    updateLinkedQuizDisplay();
+    showToast('Quiz unlinked');
+  } catch(e) {}
+}
+
+function updateLinkedQuizDisplay() {
+  const display = document.getElementById('linkedQuizDisplay');
+  if (!display) return;
+  
+  if (currentLinkedQuiz) {
+    display.innerHTML = `
+      <div style="padding:10px;background:#1a3a1a;border:1px solid #2d5a2d;border-radius:4px;margin-top:10px;">
+        <strong style="color:#4f4;">📚 Linked Quiz:</strong><br>
+        <span style="color:#fff;">${currentLinkedQuiz.title}</span><br>
+        <small style="color:#888;">${currentLinkedQuiz.questionCount} questions • PIN: ${currentLinkedQuiz.pin}</small>
+        <button onclick="unlinkQuiz()" style="margin-left:10px;padding:2px 8px;background:#633;border:none;color:#fff;border-radius:3px;cursor:pointer;">Unlink</button>
+      </div>
+    `;
+  } else {
+    display.innerHTML = '';
+  }
+}
+
+// Handle quiz link events from server
+function setupQuizSocketListeners() {
+  if (!socket) return;
+  socket.on('quizLinked', (data) => {
+    if (data.pin && data.questionCount) {
+      currentLinkedQuiz = { ...currentLinkedQuiz, ...data };
+      updateLinkedQuizDisplay();
+      addLog(`📚 Quiz linked for PIN ${data.pin}: ${data.questionCount} questions`, 'success');
+    }
+  });
+}
+
+// Search on Enter key
+document.getElementById('quizSearch')?.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') searchQuiz();
 });
 
 initApp();
